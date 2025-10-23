@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>بازی سِت - ساده با HTML/CSS/JS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#4B3C88; /* dark purple */
+      --panel:#5F4AB1; /* light purple */
+      --accent:#A084DC; /* button */
+      --card:#F8F8FF; /* card BG */
+      --text:#FFFFFF;
+      --border:rgba(255,255,255,0.12);
+      --shadow:rgba(0,0,0,0.25);
+    }
+    
+    /* Light theme */
+    [data-theme="light"] {
+      --bg:#E8E8F0; /* light gray */
+      --panel:#F5F5FA; /* lighter gray */
+      --accent:#6B46C1; /* purple */
+      --card:#FFFFFF; /* white */
+      --text:#1F2937; /* dark gray */
+      --border:rgba(0,0,0,0.12);
+      --shadow:rgba(0,0,0,0.1);
+    }
+    *{box-sizing:border-box;font-family: "Vazirmatn", "IRANSans", "Arial", sans-serif;font-display: swap;}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#392b6b);color:var(--text);transition:background 0.3s ease, color 0.3s ease}
+    [data-theme="light"] html,[data-theme="light"] body{background:linear-gradient(180deg,var(--bg),#D1D5DB)}
+    .wrap{max-width:1100px;margin:24px auto;padding:18px}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;flex-shrink:0}
+    button{background:var(--accent);border:none;padding:6px 10px;border-radius:8px;color:#111;font-weight:700;cursor:pointer;transition:background 0.3s ease, color 0.3s ease, border 0.3s ease;font-size:13px;white-space:nowrap}
+    button.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+    button:hover{opacity:0.9;transform:translateY(-1px)}
+    .info{display:flex;gap:12px;align-items:center}
+    .panel{background:rgba(255,255,255,0.06);padding:12px;border-radius:12px;transition:background 0.3s ease}
+    [data-theme="light"] .panel{background:rgba(0,0,0,0.04)}
+    main{margin-top:18px}
+    .board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .card{background:var(--card);border-radius:8px;padding:6px;min-height:120px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px var(--shadow);transition:transform .15s,box-shadow .15s,background 0.3s ease;overflow:hidden}
+    .card:hover{transform:translateY(-6px)}
+    .card.selected{outline:4px solid gold}
+    .card.matched{opacity:0.25;pointer-events:none}
+    .status{margin-top:12px;display:flex;gap:10px;align-items:center}
+    .small{font-size:13px;opacity:0.9}
+    footer{margin-top:18px;color:rgba(255,255,255,0.8);font-size:13px;transition:color 0.3s ease}
+    [data-theme="light"] footer{color:rgba(0,0,0,0.6)}
+    
+    /* Configuration Section Styles */
+    .config-section{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:1000}
+    .config-card{background:var(--panel);padding:20px;border-radius:12px;box-shadow:0 8px 24px var(--shadow);max-width:450px;width:85%;margin:20px}
+    .config-card h2{text-align:center;margin-bottom:20px;font-size:22px;color:var(--text)}
+    .config-card h3{margin-bottom:15px;font-size:16px;color:var(--accent)}
+    .radio-group{margin-bottom:20px}
+    .radio-item{display:flex;align-items:center;margin-bottom:10px;padding:10px;background:rgba(255,255,255,0.05);border-radius:8px;cursor:pointer;transition:background 0.3s ease}
+    [data-theme="light"] .radio-item{background:rgba(0,0,0,0.05)}
+    .radio-item:hover{background:rgba(255,255,255,0.1)}
+    [data-theme="light"] .radio-item:hover{background:rgba(0,0,0,0.1)}
+    .radio-item input[type="radio"]{margin-left:15px;transform:scale(1.2)}
+    .radio-item label{cursor:pointer;flex:1;font-size:16px}
+    .description{margin-top:15px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;opacity:0.9}
+    [data-theme="light"] .description{background:rgba(0,0,0,0.05)}
+    .config-buttons{display:flex;gap:12px;justify-content:center;margin-top:20px}
+    /* responsiveness */
+    @media (max-width:800px){
+      .board{grid-template-columns:repeat(3,1fr)}
+      .controls{gap:6px}
+      button{padding:6px 10px;font-size:14px}
+    }
+    @media (max-width:520px){
+      .board{grid-template-columns:repeat(2,1fr)}
+      .card{min-height:90px}
+      .controls{gap:4px}
+      button{padding:5px 8px;font-size:13px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>بازی سِت</h1>
+        <div class="small">هدف: دو مجموعهٔ سه‌تایی از کارت‌ها بساز که در هر ویژگی همه یکسان یا همه متفاوت باشند.</div>
+      </div>
+      <div class="controls">
+        <div class="info panel">
+          <span id="score">امتmiaz: 0</span> &nbsp;|&nbsp; <span id="dealt">کارت روی میز: 12</span>
+        </div>
+        <button id="themeToggle" class="secondary" title="تغییر حالت تاریک/روشن">🌙</button>
+        <button id="newGame">شروع جدید</button>
+        <button id="showSets" class="secondary">نمایش سِت ها</button>
+        <button id="countSets" class="secondary">شمارش سِت ها</button>
+        <button id="add3" class="secondary">اضافه ۳ کارت</button>
+        <button id="cardSettings" class="secondary">تنظیمات کارت</button>
+      </div>
+    </header>
+
+    <!-- Configuration Section -->
+    <div id="configSection" class="config-section" style="display:none;">
+      <div class="config-card">
+        <h2>تنظیمات کارت‌ها</h2>
+        
+        <h3>تعداد سِت های موجود:</h3>
+        
+        <div class="radio-group">
+          <div class="radio-item">
+            <input type="radio" id="fixed1" name="setCount" value="1">
+            <label for="fixed1">۱ سِت مشخص</label>
+          </div>
+          
+          <div class="radio-item">
+            <input type="radio" id="fixed2" name="setCount" value="2">
+            <label for="fixed2">۲ سِت مشخص</label>
+          </div>
+          
+          <div class="radio-item">
+            <input type="radio" id="fixed3" name="setCount" value="3">
+            <label for="fixed3">۳ سِت مشخص</label>
+          </div>
+          
+          <div class="radio-item">
+            <input type="radio" id="random" name="setCount" value="random" checked>
+            <label for="random">تعداد تصادفی سِت</label>
+          </div>
+        </div>
+        
+        <div class="config-buttons">
+          <button id="applySettings">اعمال تنظیمات</button>
+          <button id="cancelConfig" class="secondary">بازگشت</button>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <div id="message" class="panel small" style="margin-top:10px">خوش آمدی! برای شروع بازی جدید روی "شروع جدید" کلیک کن.</div>
+
+      <div id="board" class="board" style="margin-top:12px"></div>
+
+      <div class="status">
+        <div class="panel small">انتخاب شده: <span id="selectedCount">0</span></div>
+        <div class="panel small">باقیمانده در دسته: <span id="leftCount">81</span></div>
+      </div>
+
+    </main>
+
+    <footer>
+       .تمامی حقوق محفوظ به لونِترا می‌باشد | Copyright © 2025 Lunethra
+    </footer>
+  </div>
+
+<script>
+// Theme management
+let currentTheme = localStorage.getItem('theme') || 'dark';
+
+function initTheme() {
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  updateThemeIcon();
+}
+
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  localStorage.setItem('theme', currentTheme);
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+}
+
+// Initialize theme on page load
+initTheme();
+
+// Theme toggle event listener
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+</script>
+
+<script>
+// مدل کارت: 4 ویژگی هر کدام 0,1,2
+// ویژگی‌ها: number, shape, color, fill
+const COLORS = ['#D7263D','#0EAD69','#1976D2'];
+const SHAPES = ['oval','diamond','squiggle'];
+
+let deck = [];
+let board = [];
+let selected = [];
+let score = 0;
+let gameMode = 'random'; // default mode
+// Removed cardRenderType as per request, always render 'simple' visual now
+
+const boardEl = document.getElementById('board');
+const msg = document.getElementById('message');
+const scoreEl = document.getElementById('score');
+const leftEl = document.getElementById('leftCount');
+const dealtEl = document.getElementById('dealt');
+const selectedCountEl = document.getElementById('selectedCount');
+
+function generateDeck(){
+  deck = [];
+  for(let a=0;a<3;a++) for(let b=0;b<3;b++) for(let c=0;c<3;c++) for(let d=0;d<3;d++){
+    deck.push({number:a,shape:b,color:c,fill:d, id: `${a}${b}${c}${d}-${Math.random().toString(36).slice(2,7)}`});
+  }
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
+
+function startGame(){
+  generateDeck();
+  shuffle(deck);
+  board = [];
+  selected = [];
+  score = 0;
+
+  // update basic UI immediately
+  scoreEl.textContent = 'امتیاز: ' + score;
+  selectedCountEl.textContent = '0';
+  leftEl.textContent = deck.length;
+
+  // Clear the board completely and add exactly 12 cards
+  board = [];
+  for(let i=0;i<12;i++) {
+    board.push(drawFromDeck());
+  }
+  
+  if (gameMode === 'random') {
+    showMessage('بازی جدید شروع شد — ۱۲ کارت روی میز قرار گرفتند. (حالت تصادفی)');
+  } else {
+    // Fixed mode - adjust cards to ensure exact number of sets
+    const targetSets = parseInt(gameMode);
+    adjustCardsForExactSets(targetSets);
+    showMessage(`بازی جدید شروع شد — ۱۲ کارت با ${targetSets} سِت مشخص روی میز قرار گرفت.`);
+  }
+  
+  renderBoard();
+}
+
+function adjustCardsForExactSets(targetSets) {
+  let attempts = 0;
+  const maxAttempts = 200; 
+  while (attempts < maxAttempts) {
+    const currentSets = countSetsOnBoard();
+    if (currentSets === targetSets) {
+      break;
+    }
+    // Try to find a new arrangement of 12 cards
+    generateDeck();
+    shuffle(deck);
+    board = [];
+    for(let i=0;i<12;i++) board.push(drawFromDeck());
+    attempts++;
+  }
+  // If max attempts reached, just use whatever board we have
+}
+
+function drawFromDeck(){
+  return deck.length? deck.pop() : null;
+}
+
+function renderBoard(){
+  boardEl.innerHTML='';
+  board.forEach((card, idx)=>{
+    const el = document.createElement('div');
+    el.className='card';
+    el.dataset.idx = idx;
+    if(!card) { 
+      // empty slot — نشانگر فضای خالی
+      el.style.visibility='hidden'; 
+      boardEl.appendChild(el); 
+      return; 
+    }
+    
+    // Always render simple visual display
+    el.appendChild(renderCardSVG(card));
+    const label = document.createElement('div');
+    label.className = 'small';
+    label.style.marginTop = '6px';
+    label.style.fontSize = '12px';
+    label.style.opacity = '0.85';
+    // Display the Persian names for clarity
+    label.textContent = `${card.number+1} × ${SHAPES[card.shape]} • ${card.fill===0?'پر':card.fill===1?'راه‌راه':'خالی'}`;
+    // el.appendChild(label); // Added label back for better visual understanding of properties
+
+    if(selected.includes(card.id)) el.classList.add('selected');
+    if(card.matched) el.classList.add('matched');
+    el.addEventListener('click',()=>onCardClick(card, idx, el));
+    boardEl.appendChild(el);
+  });
+  updateCounters();
+}
+
+function getCardImageNumber(card) {
+  // Convert card properties to image number (1-81)
+  // Each property can be 0, 1, or 2
+  // Formula: number*27 + shape*9 + color*3 + fill + 1
+  return card.number * 27 + card.shape * 9 + card.color * 3 + card.fill + 1;
+}
+
+function renderCardSVG(card){
+  const w = 140, h = 100;
+  const svgns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgns,'svg');
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height','80');
+
+  const cx = w/2;
+  // تعیین پهنای تقریبی هر شکل (px) برای جلوگیری از همپوشانی
+  const shapeType = SHAPES[card.shape];
+  const shapeWidth = (shapeType === 'oval') ? 44 : (shapeType === 'diamond') ? 36 : 50; // squiggle پهن‌تر
+  // فاصله بین مراکز شکل‌ها: پهنای شکل + padding
+  const gap = Math.max(28, shapeWidth + 8);
+
+  const count = card.number + 1;
+  // startX طوری محاسبه می‌شود که مجموعهٔ اشکال در وسط svg باشد
+  const startX = cx - ((count - 1) * gap) / 2;
+  const y = h/2;
+
+  for(let i=0;i<count;i++){
+    const x = startX + i*gap;
+    const fillType = card.fill; // 0 solid,1 striped,2 outline
+    const color = COLORS[card.color];
+    let node;
+
+    if(shapeType==='oval'){
+      node = document.createElementNS(svgns,'ellipse');
+      node.setAttribute('rx',22);
+      node.setAttribute('ry',12);
+      node.setAttribute('cx',x);
+      node.setAttribute('cy',y);
+    } else if(shapeType==='diamond'){
+      node = document.createElementNS(svgns,'polygon');
+      const points = `${x},${y-18} ${x+18},${y} ${x},${y+18} ${x-18},${y}`;
+      node.setAttribute('points',points);
+    } else {
+      // squiggle: using path
+      node = document.createElementNS(svgns,'path');
+      const path = `M ${x-20} ${y} C ${x-10} ${y-22} ${x+10} ${y+22} ${x+20} ${y}`;
+      node.setAttribute('d',path);
+      node.setAttribute('transform',`translate(0,0)`);
+    }
+
+    node.setAttribute('stroke',color);
+    node.setAttribute('stroke-width',3);
+    node.setAttribute('stroke-linecap','round');
+    node.setAttribute('stroke-linejoin','round');
+
+    if(fillType===0){ // solid
+      node.setAttribute('fill',color);
+    } else if(fillType===1){ // striped -> use clipPath + lines
+      // clipPath for this shape
+      const maskId = 'm' + Math.random().toString(36).slice(2,9);
+      const defs = document.createElementNS(svgns,'defs');
+      const clipPath = document.createElementNS(svgns,'clipPath');
+      clipPath.setAttribute('id',maskId);
+
+      // clone node for clip — clone must have fill to create clipping region
+      const shapeClone = node.cloneNode(true);
+      shapeClone.setAttribute('fill', color); // Use color for clip region
+      shapeClone.setAttribute('stroke', 'none'); 
+      clipPath.appendChild(shapeClone);
+      defs.appendChild(clipPath);
+      svg.appendChild(defs);
+
+      // draw stripe lines within clipPath
+      const g = document.createElementNS(svgns,'g');
+      g.setAttribute('clip-path',`url(#${maskId})`);
+      const halfW = Math.ceil(shapeWidth/2) + 2;
+      for(let sx = x - halfW; sx <= x + halfW; sx += 6){
+        const line = document.createElementNS(svgns,'line');
+        line.setAttribute('x1', sx);
+        line.setAttribute('y1', y - 20);
+        line.setAttribute('x2', sx);
+        line.setAttribute('y2', y + 20);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', 1.2);
+        line.setAttribute('stroke-opacity', 0.7);
+        g.appendChild(line);
+      }
+      svg.appendChild(g);
+
+      // draw outline of shape on top and make fill none for visual consistency
+      node.setAttribute('fill','none');
+    } else { // outline
+      node.setAttribute('fill','none');
+    }
+    svg.appendChild(node);
+  }
+  return svg;
+}
+
+function onCardClick(card, idx, el){
+  if(card.matched) return;
+  const pos = selected.indexOf(card.id);
+  if(pos>-1){ selected.splice(pos,1); }
+  else { if(selected.length<3) selected.push(card.id); }
+  updateSelectionVisuals();
+  if(selected.length===3) checkSelectedSet();
+}
+
+function updateSelectionVisuals(){
+  selectedCountEl.textContent = selected.length;
+  document.querySelectorAll('.card').forEach(el=>{
+    const idx = parseInt(el.dataset.idx,10);
+    const c = board[idx];
+    if(!c) return;
+    el.classList.toggle('selected', selected.includes(c.id));
+  });
+}
+
+function cardById(id){
+  return board.find(c=>c && c.id===id);
+}
+
+function checkSelectedSet(){
+  const cards = selected.map(id=>cardById(id));
+  if(cards.some(c=>!c)){ showMessage('یکی از کارت‌ها معتبر نیست'); selected=[]; updateSelectionVisuals(); return; }
+  const ok = isSet(cards[0],cards[1],cards[2]);
+  
+  // Debug information (enhanced and corrected)
+  if(!ok){
+    const reasons = [];
+    const props = ['number','shape','color','fill'];
+    const labels = {number:'تعداد', shape:'شکل', color:'رنگ', fill:'پر/خالی'};
+    props.forEach(prop => {
+      const val0 = cards[0][prop];
+      const val1 = cards[1][prop];
+      const val2 = cards[2][prop];
+
+      // This is the correct check for "all same or all different" for values 0, 1, 2
+      if (((val0 + val1 + val2) % 3) !== 0) {
+        reasons.push(`${labels[prop]}: [${val0},${val1},${val2}] → نه همه یکسان، نه همه متفاوت`);
+      }
+    });
+    if(reasons.length > 0){
+      console.log('❌ سِت نیست، دلایل:', reasons);
+    }
+  }
+  
+  if(ok){
+    score += 1;
+    scoreEl.textContent = 'امتیاز: ' + score;
+    showMessage('سِت! 🎉');
+    // mark matched and replace with new cards if possible
+    const matchedIds = new Set(cards.map(c=>c.id));
+    cards.forEach(c=>{ c.matched = true; });
+    // replace matched cards in board with new ones from deck
+    for(let i=0;i<board.length;i++){
+      if(board[i] && matchedIds.has(board[i].id)){
+        const newc = drawFromDeck();
+        if(newc) board[i] = newc;
+        else board[i] = null; // empty slot
+      }
+    }
+    selected=[];
+    renderBoard();
+    // if no set left on board and deck has cards, add three
+    if(!existsSetOnBoard() && deck.length>0){
+      showMessage('روی میز سِت وجود ندارد؛ ۳ کارت اضافه شد.');
+      addThreeCards();
+    }
+  } else {
+    showMessage('.این سه کارت سِت نیستند');
+    // small penalty
+    score = Math.max(0, score-1);
+    scoreEl.textContent = 'امتیاز: ' + score;
+    selected = [];
+    updateSelectionVisuals();
+  }
+}
+
+function isSet(a,b,c){
+  // For each attribute, the sum of the attribute values modulo 3 must be 0.
+  // This correctly implies "all same" (e.g., 0+0+0 = 0, 1+1+1 = 3 => 0)
+  // or "all different" (e.g., 0+1+2 = 3 => 0).
+  const properties = ['number','shape','color','fill'];
+  
+  return properties.every(prop => {
+    const val0 = a[prop];
+    const val1 = b[prop];
+    const val2 = c[prop];
+
+    // This single check ensures "all same" or "all different" for values 0, 1, 2.
+    return (val0 + val1 + val2) % 3 === 0;
+  });
+}
+
+function addThreeCards(){
+  // در صورتی که جای خالی داریم اول آنها را پر می‌کنیم، و اگر باز هم کارت داریم اضافه می‌کنیم
+  // پر کردن جای خالی اولویت دارد (تا Grid مرتب بمونه)
+  let emptyIndices = [];
+  for(let i=0; i<board.length; i++) {
+    if(!board[i]) emptyIndices.push(i);
+  }
+
+  for(let i=0;i<3;i++){
+    const card = drawFromDeck();
+    if(!card) break;
+    if(emptyIndices.length > 0){
+      board[emptyIndices.shift()] = card; // Fill an empty slot
+    } else {
+      board.push(card); // Add to the end if no empty slots
+    }
+  }
+  renderBoard();
+  showMessage('۳ کارت اضافه شد.');
+}
+
+function existsSetOnBoard(){
+  const cards = board.filter(Boolean);
+  for(let i=0;i<cards.length;i++){
+    for(let j=i+1;j<cards.length;j++){
+      for(let k=j+1;k<cards.length;k++){
+        if(isSet(cards[i],cards[j],cards[k])) return true;
+      }
+    }
+  }
+  return false;
+}
+
+function countSetsOnBoard(){
+  const cards = board.filter(Boolean);
+  let count = 0;
+  for(let i=0;i<cards.length;i++){
+    for(let j=i+1;j<cards.length;j++){
+      for(let k=j+1;k<cards.length;k++){
+        if(isSet(cards[i],cards[j],cards[k])) count++;
+      }
+    }
+  }
+  return count;
+}
+
+function showMessage(t){ msg.textContent = t; }
+
+function updateCounters(){
+  leftEl.textContent = deck.length;
+  dealtEl.textContent = board.filter(Boolean).length;
+}
+
+// show sets: find and highlight first set (and report how many)
+function showSets(){
+  const cards = board.filter(Boolean);
+  const allSets = [];
+  
+  for(let i=0;i<cards.length;i++){
+    for(let j=i+1;j<cards.length;j++){
+      for(let k=j+1;k<cards.length;k++){
+        if(isSet(cards[i],cards[j],cards[k])){
+          allSets.push([cards[i].id, cards[j].id, cards[k].id]);
+        }
+      }
+    }
+  }
+  
+  if(allSets.length > 0){
+    // Show first set
+    selected = allSets[0].slice();
+    updateSelectionVisuals();
+    showMessage(`${allSets.length} سِت یافت شد — اولین سِت انتخاب شده است.`);
+  } else {
+    showMessage('روی میز سِت وجود ندارد.');
+  }
+}
+
+// UI bindings
+document.getElementById('newGame').addEventListener('click', ()=>{ 
+  startGame();
+});
+document.getElementById('cardSettings').addEventListener('click', ()=>{ 
+  document.getElementById('configSection').style.display = 'flex';
+});
+document.getElementById('showSets').addEventListener('click', ()=>{ showSets(); });
+document.getElementById('add3').addEventListener('click', ()=>{ 
+  addThreeCards(); 
+});
+document.getElementById('countSets').addEventListener('click', ()=>{ 
+  const count = countSetsOnBoard();
+  showMessage(`تعداد سِت های موجود روی میز: ${count}`);
+});
+
+// Configuration modal bindings
+document.getElementById('applySettings').addEventListener('click', function() {
+  const selectedSetCount = document.querySelector('input[name="setCount"]:checked').value;
+  
+  gameMode = selectedSetCount;
+  
+  document.getElementById('configSection').style.display = 'none';
+  
+  // Refresh the board with new settings
+  renderBoard();
+  showMessage(`تنظیمات اعمال شد.`);
+});
+
+document.getElementById('cancelConfig').addEventListener('click', function() {
+  document.getElementById('configSection').style.display = 'none';
+});
+
+// keyboard shortcuts
+window.addEventListener('keydown',(e)=>{
+  if(e.key==='s') showSets();
+  if(e.key==='n') { startGame(); }
+  if(e.key==='a') { addThreeCards(); }
+  if(e.key==='c') { 
+    const count = countSetsOnBoard();
+    showMessage(`تعداد سِت های موجود روی میز: ${count}`);
+  }
+  if(e.key==='t') { document.getElementById('configSection').style.display = 'flex'; }
+  if(e.key==='Escape') { document.getElementById('configSection').style.display = 'none'; }
+});
+
+// start auto
+startGame();
+
+</script>
+</body>
+</html>
