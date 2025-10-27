@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <style>
     :root{
       --bg:#4B3C88; /* dark purple */
@@ -80,6 +81,15 @@
       .controls{gap:4px}
       button{padding:5px 8px;font-size:13px}
     }
+    #confettiCanvas{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      pointer-events:none; /* تا روی کارت‌ها کلیک بشه */
+      z-index:9999;
+    }
   </style>
 </head>
 <body>
@@ -129,6 +139,23 @@
             <input type="radio" id="random" name="setCount" value="random" checked>
             <label for="random">تعداد تصادفی سِت</label>
           </div>
+          <h3>حالت کانفتی:</h3>
+          <div class="radio-group">
+            <div class="radio-item">
+              <input type="radio" id="confettiFull" name="confettiMode" value="full" checked>
+              <label for="confettiFull">پخش در کل صفحه</label>
+            </div>
+
+            <div class="radio-item">
+              <input type="radio" id="confettiCenter" name="confettiMode" value="center">
+              <label for="confettiCenter">فقط وسط صفحه</label>
+            </div>
+
+            <div class="radio-item">
+              <input type="radio" id="confettiOff" name="confettiMode" value="off">
+              <label for="confettiOff">غیرفعال</label>
+            </div>
+          </div>
         </div>
         
         <div class="config-buttons">
@@ -155,6 +182,92 @@
     </footer>
   </div>
 
+<canvas id="confettiCanvas"></canvas>
+<script>
+let confettiMode = localStorage.getItem('confettiMode') || 'full';
+
+const canvas = document.getElementById('confettiCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+const confettiParticles = [];
+
+function createConfetti(count=100) {
+  for(let i=0;i<count;i++){
+    confettiParticles.push({
+      x: Math.random()*canvas.width,
+      y: -10,
+      size: 5 + Math.random()*5,
+      color: `hsl(${Math.random()*360}, 70%, 50%)`,
+      speedY: 2 + Math.random()*3,
+      speedX: Math.random()*4-2,
+      rotation: Math.random()*360,
+      rotationSpeed: Math.random()*10-5
+    });
+  }
+}
+
+let confettiAnimating = false;
+
+function updateConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = confettiParticles.length - 1; i >= 0; i--) {
+    const p = confettiParticles[i];
+    p.y += p.speedY;
+    p.x += p.speedX;
+    p.rotation += p.rotationSpeed;
+
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rotation * Math.PI / 180);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+    ctx.restore();
+
+    if (p.y > canvas.height + 20) confettiParticles.splice(i, 1);
+  }
+
+  if (confettiParticles.length > 0) {
+    requestAnimationFrame(updateConfetti);
+  } else {
+    confettiAnimating = false; // وقتی تموم شد
+  }
+}
+
+function triggerConfetti(count = 100) {
+  if (confettiMode === 'off') return; // غیرفعال
+
+  if (confettiMode === 'full') {
+    // حالت خودمان (تمام صفحه)
+    createConfetti(count);
+    if (!confettiAnimating) {
+      confettiAnimating = true;
+      updateConfetti();
+    }
+  } 
+  else if (confettiMode === 'center') {
+    // حالت مرکز صفحه - با کتابخانه‌ی canvas-confetti
+    const duration = 1000;
+    const end = Date.now() + duration;
+    (function frame() {
+      confetti({
+        particleCount: 5,
+        startVelocity: 30,
+        spread: 360,
+        origin: { x: 0.5, y: 0.5 },
+      });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  }
+}
+</script>
 <script>
 // Theme management
 let currentTheme = localStorage.getItem('theme') || 'dark';
@@ -453,6 +566,7 @@ function checkSelectedSet(){
     score += 1;
     scoreEl.textContent = 'امتیاز: ' + score;
     showMessage('سِت! 🎉');
+    triggerConfetti(150);
     // mark matched and replace with new cards if possible
     const matchedIds = new Set(cards.map(c=>c.id));
     cards.forEach(c=>{ c.matched = true; });
@@ -592,11 +706,14 @@ document.getElementById('countSets').addEventListener('click', ()=>{
 });
 
 // Configuration modal bindings
-document.getElementById('applySettings').addEventListener('click', function() {
-  const selectedSetCount = document.querySelector('input[name="setCount"]:checked').value;
-  
-  gameMode = selectedSetCount;
-  
+document.getElementById('applySettings').addEventListener('click', () => {
+  const setMode = document.querySelector('input[name="setCount"]:checked').value;
+  const confMode = document.querySelector('input[name="confettiMode"]:checked').value;
+
+  gameMode = setMode;
+  confettiMode = confMode;
+
+  localStorage.setItem('confettiMode', confettiMode);
   document.getElementById('configSection').style.display = 'none';
   
   // Refresh the board with new settings
