@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fa">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>راهنمای بازی</title>
+        <link rel="shortcut icon" href="lunethra.png" type="image/png">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+
+        <style>
+            :root{
+            --bg:#4B3C88; /* dark purple */
+            --panel:#5F4AB1; /* light purple */
+            --accent:#A084DC; /* button */
+            --card:#F8F8FF; /* card BG */
+            --text:#FFFFFF;
+            --border:rgba(255,255,255,0.12);
+            --shadow:rgba(0,0,0,0.25);
+            }
+            
+            /* Light theme */
+            [data-theme="light"] {
+            --bg:#E8E8F0; /* light gray */
+            --panel:#F5F5FA; /* lighter gray */
+            --accent:#6B46C1; /* purple */
+            --card:#FFFFFF; /* white */
+            --text:#1F2937; /* dark gray */
+            --border:rgba(0,0,0,0.12);
+            --shadow:rgba(0,0,0,0.1);
+            }
+            *{box-sizing:border-box;font-family: "Vazirmatn", "IRANSans", "Arial", sans-serif;font-display: swap;direction: rtl;}
+            html,body{overflow: hidden;}
+            html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#392b6b);color:var(--text);transition:background 0.3s ease, color 0.3s ease}
+            [data-theme="light"] html,[data-theme="light"] body{background:linear-gradient(180deg,var(--bg),#D1D5DB)}
+            .wrap{max-width:1100px;margin:24px auto;padding:18px}
+            header{display:flex;gap:12px;align-items:center;justify-content:space-between}
+            h1{margin:0;font-size:20px}
+            .controls{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;flex-shrink:0}
+            button{background:var(--accent);border:none;padding:6px 10px;border-radius:8px;color:#111;font-weight:700;cursor:pointer;transition:background 0.3s ease, color 0.3s ease, border 0.3s ease;font-size:13px;white-space:nowrap}
+            button.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+            button:hover{opacity:0.9;transform:translateY(-1px)}
+            .info{display:flex;gap:12px;align-items:center}
+            .panel{background:rgba(255,255,255,0.06);padding:12px;border-radius:12px;transition:background 0.3s ease}
+            [data-theme="light"] .panel{background:rgba(0,0,0,0.04)}
+            main{margin-top:18px}
+            .board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+            .card{background:var(--card);border-radius:8px;padding:6px;min-height:120px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px var(--shadow);transition:transform .15s,box-shadow .15s,background 0.3s ease;overflow:hidden}
+            .card:hover{transform:translateY(-6px)}
+            .card.selected{outline:4px solid gold}
+            .card.matched{opacity:0.25;pointer-events:none}
+            .status{margin-top:12px;display:flex;gap:10px;align-items:center}
+            .small{font-size:13px;opacity:0.9}
+            footer{margin-top:18px;color:rgba(255,255,255,0.8);font-size:13px;transition:color 0.3s ease}
+            [data-theme="light"] footer{color:rgba(0,0,0,0.6)}
+            body{text-align: center;}
+            div{max-width: 800px;margin: auto;border-color: #ffffff;border-width: 2px;border-radius: 25px;border-style: solid;background-color: rgb(55, 40, 116);}
+            #headertitle{font-size: 35px;margin-top: 15px;margin-bottom: 15px;}
+            div {
+                max-width: 800px;
+                margin: auto;
+                border: 2px solid #ffffff;
+                border-radius: 25px;
+                overflow: hidden;
+            }
+
+            div img {
+                width: 90%;
+                height: auto;
+                display: block;
+                border-radius: inherit;
+                object-fit: cover;
+                margin:auto;
+            }
+            /* responsiveness */
+            @media (max-width:800px){
+            .board{grid-template-columns:repeat(3,1fr)}
+            .controls{gap:6px}
+            button{padding:6px 10px;font-size:14px}
+            }
+            @media (max-width:520px){
+            .board{grid-template-columns:repeat(2,1fr)}
+            .card{min-height:90px}
+            .controls{gap:4px}
+            button{padding:5px 8px;font-size:13px}
+            }
+        </style>
+    </head>
+    <body>
+        <h1 id="headertitle">راهنمای بازی سِت</h1>
+        <div>
+            <h2>تئوری بازی</h2>
+            <p style="margin-right: 20px;margin-left: 20px;text-align: justify;text-justify: inter-word;">بازی سِت شامل 81 کارت است و هر کارت 4 ویژگی دارد: رنگ، تعداد، نوع و طرح. هر بازیکن باید سریع‌تر از بقیه، از بین 12 کارت، 3 کارت پیدا کند که در این 4 ویژگی یا کاملاً با هم برابر باشند یا کاملاً متفاوت. یعنی در هر ویژگی مثل هم باشند یا هر سه با هم فرق داشته باشند. تعداد نفرات در این بازی محدودیتی ندارد.</p>
+            <h2>مثال های سِت</h2>
+            <h3>مثال اول</h3>
+            <img src="example_imgs/image1.png">
+            <p>برای صحت‌سنجی هر سِت باید چهار ویژگی شکل‌ها را بررسی کنیم:</p>
+            <ul>
+                <li>ویژگی تعداد: هر سه شکل دارای دو تا لوزی هستند.</li>
+                <li>ویژگی نوع شکل: هر سه شکل لوزی هستند.</li>
+                <li>ویژگی رنگ: رنگ هر سه شکل متفاوت است.</li>
+                <li>ویژگی طرح شکل: هر سه شکل دارای طرح متفاوت هستند، یکی خالی، دومی پر و سومی هاشور خورده.</li>
+            </ul>
+        </div>
+        <a target="_blank" href="index.html"><button style="margin-top: 25px;width: 450px;">بازگشت به بازی اصلی</button></a>
+    </body>
+</html>

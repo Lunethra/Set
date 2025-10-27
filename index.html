@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>بازی سِت - ساده با HTML/CSS/JS</title>
+  <title>بازی سِت</title>
   <link rel="shortcut icon" href="lunethra.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,7 @@
       --bg:#4B3C88; /* dark purple */
       --panel:#5F4AB1; /* light purple */
       --accent:#A084DC; /* button */
-      --card:#F8F8FF; /* card BG */
+      --card:#33274d; /* card BG */
       --text:#FFFFFF;
       --border:rgba(255,255,255,0.12);
       --shadow:rgba(0,0,0,0.25);
@@ -30,7 +30,8 @@
       --border:rgba(0,0,0,0.12);
       --shadow:rgba(0,0,0,0.1);
     }
-    *{box-sizing:border-box;font-family: "Vazirmatn", "IRANSans", "Arial", sans-serif;font-display: swap;}
+    *{box-sizing:border-box;font-family: "Vazirmatn", "IRANSans", "Arial", sans-serif;font-display: swap;direction: rtl;}
+    /* html,body{overflow: hidden;} */
     html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#392b6b);color:var(--text);transition:background 0.3s ease, color 0.3s ease}
     [data-theme="light"] html,[data-theme="light"] body{background:linear-gradient(180deg,var(--bg),#D1D5DB)}
     .wrap{max-width:1100px;margin:24px auto;padding:18px}
@@ -47,7 +48,7 @@
     .board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
     .card{background:var(--card);border-radius:8px;padding:6px;min-height:120px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px var(--shadow);transition:transform .15s,box-shadow .15s,background 0.3s ease;overflow:hidden}
     .card:hover{transform:translateY(-6px)}
-    .card.selected{outline:4px solid gold}
+    .card.selected{outline:4px solid red}
     .card.matched{opacity:0.25;pointer-events:none}
     .status{margin-top:12px;display:flex;gap:10px;align-items:center}
     .small{font-size:13px;opacity:0.9}
@@ -178,7 +179,7 @@
     </main>
 
     <footer>
-       .تمامی حقوق محفوظ به لونِترا می‌باشد | Copyright © 2025 Lunethra
+       تمامی حقوق محفوظ به لونِترا می‌باشد. | Copyright © 2025 Lunethra
     </footer>
   </div>
 
@@ -270,7 +271,7 @@ function triggerConfetti(count = 100) {
 </script>
 <script>
 // Theme management
-let currentTheme = localStorage.getItem('theme') || 'dark';
+let currentTheme = localStorage.getItem('theme') || 'light';
 
 function initTheme() {
   document.documentElement.setAttribute('data-theme', currentTheme);
